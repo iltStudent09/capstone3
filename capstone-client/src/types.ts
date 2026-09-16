@@ -87,6 +87,11 @@ export interface DashboardResponse {
   data: DashboardStats;
 }
 
+export interface ResourceResponse<T> {
+  message: string;
+  data: T;
+}
+
 export interface ClaimStats {
   totalClaims: number;
   claimsByStatus: StatusCount[];
