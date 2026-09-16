@@ -64,6 +64,15 @@
 
 body {
   margin: 0;
+  min-width: 320px;
+  min-height: 100vh;
+  background:
+    radial-gradient(circle at top, rgba(170, 59, 255, 0.14), transparent 30%),
+    linear-gradient(180deg, #faf7ff 0%, #f5f3ff 100%);
+}
+
+a {
+  color: inherit;
 }
 
 h1,
