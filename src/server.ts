@@ -13,7 +13,7 @@ import healthRoutes from './routes/health';
 dotenv.config();
 
 const app = express();
-const port = Number(process.env.PORT) || 3000;
+const port = Number(process.env.PORT) || 4000;
 const clientOrigin = process.env.CLIENT_ORIGIN || 'http://localhost:5173';
 
 app.use(
