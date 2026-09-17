@@ -1,0 +1,57 @@
+services:
+  mongo:
+    image: mongo:7
+    container_name: capstone-mongo
+    environment:
+      MONGO_INITDB_DATABASE: policy-claims
+    volumes:
+      - mongo_data:/data/db
+    healthcheck:
+      test: ["CMD-SHELL", "mongosh --quiet localhost:27017/test --eval 'db.runCommand({ ping: 1 }).ok' || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+    networks:
+      - capstone-network
+
+  api:
+    build:
+      context: .
+      dockerfile: capstone-api/Dockerfile
+    container_name: capstone-api
+    environment:
+      PORT: 4000
+      MONGODB_URI: mongodb://mongo:27017/policy-claims
+      JWT_SECRET: ${JWT_SECRET:-your-jwt-secret-key-change-in-production}
+      CLIENT_ORIGIN: ${CLIENT_ORIGIN:-https://localhost:8443}
+    depends_on:
+      mongo:
+        condition: service_healthy
+    restart: unless-stopped
+    networks:
+      - capstone-network
+
+  client:
+    build:
+      context: .
+      dockerfile: capstone-client/Dockerfile
+    container_name: capstone-client
+    ports:
+      - "8080:80"
+      - "8443:443"
+    volumes:
+      - ./certs:/etc/nginx/certs:ro
+      - ./capstone-client/nginx-ssl.conf:/etc/nginx/conf.d/default.conf:ro
+    depends_on:
+      - api
+    restart: unless-stopped
+    networks:
+      - capstone-network
+
+volumes:
+  mongo_data:
+
+networks:
+  capstone-network:
+    driver: bridge
