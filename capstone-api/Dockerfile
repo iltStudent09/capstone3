@@ -30,8 +30,8 @@ RUN npm ci --only=production && npm cache clean --force
 # Copy compiled JavaScript from builder stage
 COPY --from=builder /build/dist ./dist
 
-# Copy any additional assets if needed
-COPY .env.example ./ 2>/dev/null || true
+# Copy environment template for local development
+COPY .env.example ./
 
 # Expose API port
 EXPOSE 4000
