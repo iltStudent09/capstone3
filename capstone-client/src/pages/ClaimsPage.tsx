@@ -16,6 +16,7 @@ import PageContainer from '../components/layout/PageContainer'
 import StatusBadge from '../components/dashboard/StatusBadge'
 import EmptyState from '../components/common/EmptyState'
 import LoadingState from '../components/common/LoadingState'
+import { formatNumberInput, parseNumberInput } from '../utils/format'
 
 const pageSize = 5
 const claimStatuses: ClaimStatus[] = ['submitted', 'under-review', 'approved', 'denied', 'closed']
@@ -116,7 +117,7 @@ export default function ClaimsPage() {
       return
     }
 
-    const amount = Number(form.amount)
+    const amount = parseNumberInput(form.amount)
 
     if (Number.isNaN(amount) || amount < 0) {
       setError('Enter a valid claim amount.')
@@ -265,11 +266,16 @@ export default function ClaimsPage() {
               <label className="field">
                 <span className="field__label">Amount</span>
                 <input
-                  type="number"
-                  min="0"
-                  step="1"
+                  type="text"
+                  inputMode="numeric"
+                  pattern="[0-9,]*"
                   value={form.amount}
-                  onChange={(event) => setForm((current) => ({ ...current, amount: event.target.value }))}
+                  onChange={(event) =>
+                    setForm((current) => ({
+                      ...current,
+                      amount: formatNumberInput(event.target.value),
+                    }))
+                  }
                   placeholder="0"
                   required
                 />

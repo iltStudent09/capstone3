@@ -7,6 +7,22 @@ export const formatCurrency = (value: number) =>
     maximumFractionDigits: 0,
   }).format(value)
 
+export const formatNumberInput = (value: string) => {
+  if (!value) {
+    return ''
+  }
+
+  const digits = value.replace(/[^0-9]/g, '')
+
+  if (!digits) {
+    return ''
+  }
+
+  return digits.replace(/\B(?=(\d{3})+(?!\d))/g, ',')
+}
+
+export const parseNumberInput = (value: string) => Number(value.replace(/,/g, ''))
+
 export const formatDate = (value: string) =>
   new Intl.DateTimeFormat('en-US', {
     month: 'short',

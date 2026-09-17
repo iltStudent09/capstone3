@@ -15,6 +15,7 @@ import PageContainer from '../components/layout/PageContainer'
 import StatusBadge from '../components/dashboard/StatusBadge'
 import EmptyState from '../components/common/EmptyState'
 import LoadingState from '../components/common/LoadingState'
+import { formatNumberInput, parseNumberInput } from '../utils/format'
 
 const pageSize = 5
 const policyTypes: Array<'all' | PolicyType> = ['all', 'auto', 'home', 'life']
@@ -93,7 +94,7 @@ export default function PoliciesPage() {
       return
     }
 
-    const premium = Number(form.premium)
+    const premium = parseNumberInput(form.premium)
 
     if (Number.isNaN(premium) || premium < 0) {
       setError('Enter a valid premium amount.')
@@ -242,11 +243,16 @@ export default function PoliciesPage() {
               <label className="field">
                 <span className="field__label">Premium</span>
                 <input
-                  type="number"
-                  min="0"
-                  step="1"
+                  type="text"
+                  inputMode="numeric"
+                  pattern="[0-9,]*"
                   value={form.premium}
-                  onChange={(event) => setForm((current) => ({ ...current, premium: event.target.value }))}
+                  onChange={(event) =>
+                    setForm((current) => ({
+                      ...current,
+                      premium: formatNumberInput(event.target.value),
+                    }))
+                  }
                   placeholder="0"
                   required
                 />
