@@ -6,6 +6,17 @@ import { validateRequest } from '../middleware/validate';
 
 const router = Router();
 
+const isAdmin = (req: Request) => req.user?.role === 'admin';
+
+const isOwnerOrAdmin = (req: Request, policy: any) => {
+  if (isAdmin(req)) {
+    return true;
+  }
+
+  const ownerId = policy.owner?._id?.toString?.() ?? policy.owner?.toString?.();
+  return ownerId === req.user?._id?.toString();
+};
+
 // Apply auth middleware to all routes
 router.use(authMiddleware);
 
@@ -24,7 +35,7 @@ router.get(
     try {
       const { type, status, search, page = 1, limit = 10 } = req.query;
 
-      const filter: any = { owner: req.user._id };
+      const filter: any = isAdmin(req) ? {} : { owner: req.user._id };
 
       if (type) filter.type = type;
       if (status) filter.status = status;
@@ -74,7 +85,7 @@ router.get('/:id', async (req: Request, res: Response, next: NextFunction) => {
       return res.status(404).json({ error: 'Policy not found' });
     }
 
-    if (policy.owner._id.toString() !== req.user._id.toString()) {
+    if (!isOwnerOrAdmin(req, policy)) {
       return res.status(403).json({ error: 'Unauthorized' });
     }
 
@@ -187,7 +198,7 @@ router.put(
         return res.status(404).json({ error: 'Policy not found' });
       }
 
-      if (policy.owner._id.toString() !== req.user._id.toString()) {
+      if (!isOwnerOrAdmin(req, policy)) {
         return res.status(403).json({ error: 'Unauthorized' });
       }
 
@@ -214,7 +225,7 @@ router.delete('/:id', async (req: Request, res: Response, next: NextFunction) =>
       return res.status(404).json({ error: 'Policy not found' });
     }
 
-    if (policy.owner._id.toString() !== req.user._id.toString()) {
+    if (!isOwnerOrAdmin(req, policy)) {
       return res.status(403).json({ error: 'Unauthorized' });
     }
 
