@@ -15,70 +15,70 @@ const seed = async (): Promise<void> => {
   await User.deleteMany({});
 
   const admin = await User.create({
-    name: 'Ava Admin',
+    name: 'Jon Snow',
     email: 'admin@example.com',
     password: 'AdminPass123',
     role: 'admin',
   });
 
-  const adjusterOne = await User.create({
-    name: 'Jordan Adjuster',
-    email: 'jordan@example.com',
-    password: 'Adjuster123',
+  const adjuster = await User.create({
+    name: 'Arya Stark',
+    email: 'arya.stark@example.com',
+    password: 'AryaStark123',
     role: 'adjuster',
   });
 
   const adjusterTwo = await User.create({
-    name: 'Taylor Claims',
-    email: 'taylor@example.com',
-    password: 'ClaimsPass123',
+    name: 'Brienne Tarth',
+    email: 'brienne.tarth@example.com',
+    password: 'BrienneTarth123',
     role: 'adjuster',
   });
 
   const policies = await Policy.insertMany([
     {
       policyNumber: 'AUTO-1001',
-      holderName: 'Michael Reed',
+      holderName: 'Daenerys Targaryen',
       type: 'auto',
       premium: 1240,
       status: 'active',
       effectiveDate: new Date('2026-01-01'),
       expirationDate: new Date('2026-12-31'),
-      owner: adjusterOne._id,
+      owner: adjuster._id,
     },
     {
       policyNumber: 'HOME-2001',
-      holderName: 'Sofia Bennett',
+      holderName: 'Tyrion Lannister',
       type: 'home',
       premium: 2150,
-      status: 'active',
+      status: 'expired',
       effectiveDate: new Date('2026-02-15'),
       expirationDate: new Date('2027-02-14'),
       owner: admin._id,
     },
     {
       policyNumber: 'LIFE-3001',
-      holderName: 'Daniel Carter',
+      holderName: 'Sansa Stark',
       type: 'life',
       premium: 980,
-      status: 'expired',
+      status: 'active',
       effectiveDate: new Date('2024-03-01'),
       expirationDate: new Date('2025-02-28'),
       owner: adjusterTwo._id,
     },
     {
       policyNumber: 'AUTO-1002',
-      holderName: 'Priya Shah',
+      holderName: 'Cersei Lannister',
       type: 'auto',
       premium: 1435,
       status: 'cancelled',
       effectiveDate: new Date('2025-07-01'),
       expirationDate: new Date('2026-06-30'),
-      owner: adjusterOne._id,
+      owner: adjusterTwo._id,
     },
     {
       policyNumber: 'HOME-2002',
-      holderName: 'Elena Torres',
+      holderName: 'Jaime Lannister',
       type: 'home',
       premium: 1895,
       status: 'active',
@@ -95,11 +95,11 @@ const seed = async (): Promise<void> => {
       incidentDate: new Date('2026-07-04'),
       amount: 3200,
       status: 'submitted' as const,
-      assignedTo: adjusterOne._id,
+      assignedTo: adjuster._id,
       notes: [
         {
-          author: adjusterOne._id,
-          text: 'Initial documents received from policy holder.',
+          author: adjuster._id,
+          text: 'Initial documents received from Daenerys Targaryen.',
           createdAt: new Date('2026-07-05'),
         },
       ],
@@ -110,28 +110,34 @@ const seed = async (): Promise<void> => {
       incidentDate: new Date('2026-06-20'),
       amount: 8700,
       status: 'under-review' as const,
-      assignedTo: admin._id,
+      assignedTo: adjusterTwo._id,
       notes: [
         {
-          author: admin._id,
-          text: 'Inspector scheduled for site visit.',
+          author: adjusterTwo._id,
+          text: 'Inspector scheduled for site visit at Tyrion Lannister residence.',
           createdAt: new Date('2026-06-22'),
         },
         {
-          author: adjusterTwo._id,
-          text: 'Waiting on contractor estimate.',
+          author: adjuster._id,
+          text: 'Waiting on contractor estimate from Winterfell Roofing.',
           createdAt: new Date('2026-06-24'),
         },
       ],
     },
     {
       policy: policies[2]._id,
-      description: 'Beneficiary payout request review',
+      description: 'Life policy beneficiary payout request review',
       incidentDate: new Date('2025-01-14'),
       amount: 15000,
       status: 'approved' as const,
-      assignedTo: adjusterTwo._id,
-      notes: [],
+      assignedTo: adjuster._id,
+      notes: [
+        {
+          author: adjuster._id,
+          text: 'Beneficiary confirmation completed for Sansa Stark.',
+          createdAt: new Date('2025-01-16'),
+        },
+      ],
     },
     {
       policy: policies[3]._id,
@@ -139,10 +145,10 @@ const seed = async (): Promise<void> => {
       incidentDate: new Date('2026-03-11'),
       amount: 650,
       status: 'denied' as const,
-      assignedTo: adjusterOne._id,
+      assignedTo: adjusterTwo._id,
       notes: [
         {
-          author: adjusterOne._id,
+          author: adjusterTwo._id,
           text: 'Claim denied due to policy cancellation before incident date.',
           createdAt: new Date('2026-03-13'),
         },
@@ -154,10 +160,10 @@ const seed = async (): Promise<void> => {
       incidentDate: new Date('2026-08-02'),
       amount: 4100,
       status: 'closed' as const,
-      assignedTo: admin._id,
+      assignedTo: adjuster._id,
       notes: [
         {
-          author: admin._id,
+          author: adjuster._id,
           text: 'Payment issued and file closed.',
           createdAt: new Date('2026-08-10'),
         },
@@ -170,7 +176,13 @@ const seed = async (): Promise<void> => {
       amount: 1200,
       status: 'under-review' as const,
       assignedTo: adjusterTwo._id,
-      notes: [],
+      notes: [
+        {
+          author: adjusterTwo._id,
+          text: 'Additional photos requested from Daenerys Targaryen.',
+          createdAt: new Date('2026-08-16'),
+        },
+      ],
     },
   ];
 
