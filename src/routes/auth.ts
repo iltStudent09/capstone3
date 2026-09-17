@@ -21,11 +21,15 @@ router.post(
     body('password')
       .isLength({ min: 8 })
       .withMessage('Password must be at least 8 characters'),
+    body('role')
+      .optional()
+      .isIn(['adjuster', 'admin'])
+      .withMessage('Role must be adjuster or admin'),
   ],
   validateRequest,
   async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const { name, email, password } = req.body;
+      const { name, email, password, role } = req.body;
 
       // Check if user already exists
       const existingUser = await User.findOne({ email });
@@ -34,7 +38,7 @@ router.post(
       }
 
       // Create new user
-      const user = new User({ name, email, password });
+      const user = new User({ name, email, password, role });
       await user.save();
 
       // Generate JWT
