@@ -1,16 +1,14 @@
 import { useState, type FormEvent } from 'react'
 import { Link, Navigate, useLocation, useNavigate } from 'react-router-dom'
-import axios from 'axios'
 
 import { useAuth } from '../context/AuthContext'
-import type { ApiErrorResponse } from '../types'
 
 export default function LoginPage() {
   const { login, token } = useAuth()
   const navigate = useNavigate()
   const location = useLocation()
-  const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
+  const [email, setEmail] = useState('admin@example.com')
+  const [password, setPassword] = useState('AdminPass123')
   const [error, setError] = useState('')
   const [submitting, setSubmitting] = useState(false)
 
@@ -30,11 +28,7 @@ export default function LoginPage() {
       await login(email, password)
       navigate(redirectTo, { replace: true })
     } catch (err) {
-      if (axios.isAxiosError<ApiErrorResponse>(err)) {
-        setError(err.response?.data.error || 'Login failed')
-      } else {
-        setError('Login failed')
-      }
+      setError(err instanceof Error ? err.message : 'Login failed')
     } finally {
       setSubmitting(false)
     }
@@ -45,10 +39,11 @@ export default function LoginPage() {
       <div className="auth-card">
         <h1>Sign in</h1>
         <p className="auth-copy">Access your claims dashboard.</p>
+        <p className="auth-help">Demo account: admin@example.com / AdminPass123</p>
 
         <form className="auth-form" onSubmit={handleSubmit}>
-          <label>
-            <span>Email</span>
+          <label className="field">
+            <span className="field__label">Email</span>
             <input
               type="email"
               value={email}
@@ -58,8 +53,8 @@ export default function LoginPage() {
             />
           </label>
 
-          <label>
-            <span>Password</span>
+          <label className="field">
+            <span className="field__label">Password</span>
             <input
               type="password"
               value={password}
@@ -69,9 +64,9 @@ export default function LoginPage() {
             />
           </label>
 
-          {error ? <p className="auth-error">{error}</p> : null}
+          {error ? <p className="form-error">{error}</p> : null}
 
-          <button type="submit" disabled={submitting}>
+          <button type="submit" className="primary-button" disabled={submitting}>
             {submitting ? 'Signing in...' : 'Login'}
           </button>
         </form>

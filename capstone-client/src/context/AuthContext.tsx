@@ -9,7 +9,7 @@ import {
 } from 'react'
 
 import api from '../api'
-import type { AuthResponse, User, UserRole } from '../types'
+import type { AuthMeResponse, AuthResponse, User, UserRole } from '../types'
 
 interface AuthContextValue {
   user: User | null
@@ -36,22 +36,40 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    const savedToken = localStorage.getItem(TOKEN_KEY)
-    const savedUser = localStorage.getItem(USER_KEY)
+    const initializeAuth = async () => {
+      const savedToken = localStorage.getItem(TOKEN_KEY)
+      const savedUser = localStorage.getItem(USER_KEY)
 
-    if (savedToken) {
+      if (!savedToken) {
+        setLoading(false)
+        return
+      }
+
       setToken(savedToken)
-    }
 
-    if (savedUser) {
+      if (savedUser) {
+        try {
+          setUser(JSON.parse(savedUser) as User)
+        } catch {
+          localStorage.removeItem(USER_KEY)
+        }
+      }
+
       try {
-        setUser(JSON.parse(savedUser) as User)
+        const { data } = await api.get<AuthMeResponse>('/auth/me')
+        setUser(data.user)
+        localStorage.setItem(USER_KEY, JSON.stringify(data.user))
       } catch {
+        localStorage.removeItem(TOKEN_KEY)
         localStorage.removeItem(USER_KEY)
+        setToken(null)
+        setUser(null)
+      } finally {
+        setLoading(false)
       }
     }
 
-    setLoading(false)
+    void initializeAuth()
   }, [])
 
   const persistAuth = useCallback((payload: AuthResponse) => {
@@ -100,7 +118,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       register,
       logout,
     }),
-    [user, token, loading, login, register, logout],
+    [loading, login, logout, register, token, user],
   )
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
