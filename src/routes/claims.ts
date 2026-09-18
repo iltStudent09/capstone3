@@ -28,6 +28,11 @@ router.get(
 
       const filter: any = {};
 
+      // Restrict to own claims if not admin
+      if (req.user?.role !== 'admin') {
+        filter.assignedTo = req.user._id;
+      }
+
       if (status) filter.status = status;
       if (policy) filter.policy = policy;
       if (assignedTo) filter.assignedTo = assignedTo;
@@ -115,6 +120,11 @@ router.get('/:id', async (req: Request, res: Response, next: NextFunction) => {
       return res.status(404).json({ error: 'Claim not found' });
     }
 
+    // Restrict access if not admin and not assigned to this claim
+    if (req.user?.role !== 'admin' && claim.assignedTo?._id?.toString() !== req.user?._id?.toString()) {
+      return res.status(403).json({ error: 'Unauthorized' });
+    }
+
     res.status(200).json({
       message: 'Claim retrieved',
       data: claim,
@@ -192,7 +202,12 @@ router.put(
   async (req: Request, res: Response, next: NextFunction) => {
     try {
       const claim = await Claim.findById(req.params.id);
+// Restrict access if not admin and not assigned to this claim
+      if (req.user?.role !== 'admin' && claim.assignedTo?.toString() !== req.user?._id?.toString()) {
+        return res.status(403).json({ error: 'Unauthorized' });
+      }
 
+      
       if (!claim) {
         return res.status(404).json({ error: 'Claim not found' });
       }
@@ -251,7 +266,20 @@ router.post(
 
 // DELETE /api/claims/:id - Delete claim
 router.delete('/:id', async (req: Request, res: Response, next: NextFunction) => {
-  try {
+  try
+
+    // Restrict access if not admin and not assigned to this claim
+    if (req.user?.role !== 'admin' && claim.assignedTo?.toString() !== req.user?._id?.toString()) {
+      return res.status(403).json({ error: 'Unauthorized' });
+    }
+
+    await Claim.findByIdAndDelete(req.params.id);
+
+    res.status(200).json({ message: 'Claim deleted successfully' });
+  } catch (error) {
+    next(error);
+  }
+}); {
     const claim = await Claim.findById(req.params.id);
 
     if (!claim) {

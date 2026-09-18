@@ -15,6 +15,12 @@ dotenv.config();
 const app = express();
 const port = Number(process.env.PORT) || 4000;
 const clientOrigin = process.env.CLIENT_ORIGIN || 'http://localhost:5173';
+const jwtSecret = process.env.JWT_SECRET;
+
+if (!jwtSecret) {
+  console.error('Error: JWT_SECRET environment variable is required');
+  process.exit(1);
+}
 
 app.use(
   cors({

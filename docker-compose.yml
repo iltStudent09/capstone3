@@ -28,7 +28,7 @@ services:
       PORT: 4000
       MONGODB_URI: mongodb://mongo:27017/policy-claims
       JWT_SECRET: ${JWT_SECRET:-your-jwt-secret-key-change-in-production}
-      CLIENT_ORIGIN: ${CLIENT_ORIGIN:-http://localhost:5173}
+      CLIENT_ORIGIN: ${CLIENT_ORIGIN:-http://localhost:3000}
     depends_on:
       mongo:
         condition: service_healthy
@@ -40,8 +40,7 @@ services:
       dockerfile: capstone-client/Dockerfile
     container_name: capstone-client
     ports:
-      - "80:80"
-      - "443:443"
+      - "3000:80"
     depends_on:
       - api
     restart: unless-stopped

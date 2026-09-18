@@ -28,7 +28,11 @@ export const authMiddleware = async (
       return res.status(401).json({ error: 'No token provided' });
     }
 
-    const decoded = jwt.verify(token, process.env.JWT_SECRET || 'secret');
+    if (!process.env.JWT_SECRET) {
+      return res.status(500).json({ error: 'Server configuration error' });
+    }
+
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
     if (typeof decoded === 'string') {
       return res.status(401).json({ error: 'Invalid token' });

@@ -9,11 +9,17 @@ const router = Router();
 // GET /api/dashboard - Get dashboard statistics
 router.get('/', authMiddleware, async (req: Request, res: Response, next: NextFunction) => {
   try {
-    // Total claims
-    const totalClaims = await Claim.countDocuments();
+    // Admin sees all stats, adjusters see only their assigned claims
+    const isAdmin = req.user?.role === 'admin';
+    const userId = req.user?._id;
+
+    // Total claims (all for admin, only assigned for adjusters)
+    const claimFilter = isAdmin ? {} : { assignedTo: userId };
+    const totalClaims = await Claim.countDocuments(claimFilter);
 
     // Claims by status
     const claimsByStatus = await Claim.aggregate([
+      { $match: claimFilter },
       {
         $group: {
           _id: '$status',
@@ -22,11 +28,13 @@ router.get('/', authMiddleware, async (req: Request, res: Response, next: NextFu
       },
     ]);
 
-    // Total policies
-    const totalPolicies = await Policy.countDocuments();
+    // Total policies (all for admin, only owned for adjusters)
+    const policyFilter = isAdmin ? {} : { owner: userId };
+    const totalPolicies = await Policy.countDocuments(policyFilter);
 
     // Policies by type
     const policiesByType = await Policy.aggregate([
+      { $match: policyFilter },
       {
         $group: {
           _id: '$type',
@@ -35,11 +43,11 @@ router.get('/', authMiddleware, async (req: Request, res: Response, next: NextFu
       },
     ]);
 
-    // Total users
-    const totalUsers = await User.countDocuments();
+    // Total users (only 1 if not admin)
+    const totalUsers = isAdmin ? await User.countDocuments() : 1;
 
-    // Recent claims (last 5)
-    const recentClaims = await Claim.find()
+    // Recent claims (only own if adjuster)
+    const recentClaims = await Claim.find(claimFilter)
       .populate('policy', 'policyNumber holderName')
       .populate('assignedTo', 'name email')
       .sort({ createdAt: -1 })
@@ -47,6 +55,7 @@ router.get('/', authMiddleware, async (req: Request, res: Response, next: NextFu
 
     // Total claim amount
     const totalAmount = await Claim.aggregate([
+      { $match: claimFilter },
       {
         $group: {
           _id: null,
